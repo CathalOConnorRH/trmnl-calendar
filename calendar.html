@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Affirmation Calendar</title>
+<style>
+html, body { margin:0; padding:0; width:800px; height:480px; overflow:hidden; background:#fff; }
+.ac-wrap { display:flex; width:800px; height:480px; font-family:"Helvetica Neue", Arial, sans-serif; color:#000; box-sizing:border-box; }
+.ac-cal { width:480px; padding:18px 16px 14px 20px; box-sizing:border-box; display:flex; flex-direction:column; }
+.ac-head { display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px; }
+.ac-month { font-size:34px; font-weight:800; letter-spacing:-0.5px; }
+.ac-year { font-size:20px; font-weight:600; }
+.ac-dow { display:grid; grid-template-columns:repeat(7,1fr); font-size:14px; font-weight:700; text-align:center; border-bottom:2px solid #000; padding-bottom:4px; margin-bottom:4px; }
+.ac-grid { flex:1; display:grid; grid-template-columns:repeat(7,1fr); gap:3px; }
+.ac-day { display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:22px; font-weight:600; border-radius:8px; }
+.ac-heart { font-size:12px; line-height:1; margin-top:1px; }
+.ac-today { background:#000; color:#fff; font-weight:800; }
+.ac-panel { width:320px; background:#000; color:#fff; padding:28px 26px; box-sizing:border-box; display:flex; flex-direction:column; justify-content:space-between; }
+.ac-date { font-size:18px; font-weight:600; text-transform:uppercase; letter-spacing:1.5px; }
+.ac-aff { font-size:32px; line-height:1.25; font-weight:700; }
+.ac-foot { font-size:18px; font-weight:600; }
+</style>
+</head>
+<body>
+<div class="ac-wrap">
+<div class="ac-cal">
+<div class="ac-head"><span class="ac-month" id="month"></span><span class="ac-year" id="year"></span></div>
+<div class="ac-dow"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+<div class="ac-grid" id="grid"></div>
+</div>
+<div class="ac-panel">
+<div class="ac-date" id="date"></div>
+<div class="ac-aff" id="aff"></div>
+<div class="ac-foot" id="foot"></div>
+</div>
+</div>
+<script>
+var HER_NAME = "";                 // e.g. "Sarah" - leave "" to hide
+var TIME_ZONE = "Europe/Dublin";
+var AFFIRMATIONS = [
+"You are loved more than words can say.",
+"You are stronger than you know.",
+"Your kindness makes the world brighter.",
+"You are enough, exactly as you are.",
+"Today is full of good things waiting for you.",
+"You make our home a happy place.",
+"Your laugh is my favourite sound.",
+"You handle hard things with grace.",
+"You deserve rest, joy and good coffee.",
+"You are beautiful, inside and out.",
+"Every day with you is a gift.",
+"You are doing an amazing job.",
+"Your heart is your superpower.",
+"Be proud of how far you've come.",
+"You light up every room you walk into.",
+"You are capable of wonderful things.",
+"It's okay to slow down today.",
+"You are cherished, always.",
+"Your dreams matter.",
+"You bring calm to the chaos.",
+"The people around you are lucky to have you.",
+"You are brave, even on the quiet days.",
+"Good things are coming your way.",
+"You make ordinary days feel special.",
+"You are worthy of every good thing.",
+"Trust yourself - you've got this.",
+"You are my favourite person.",
+"Your patience is a quiet kind of strength.",
+"Today, be gentle with yourself.",
+"You grow more amazing every year.",
+"Thank you for being you."
+];
+function localParts() {
+try {
+var p = new Intl.DateTimeFormat("en-GB", { timeZone: TIME_ZONE, year:"numeric", month:"numeric", day:"numeric" }).formatToParts(new Date());
+var o = {}; p.forEach(function (x) { o[x.type] = parseInt(x.value, 10); });
+return { y:o.year, m:o.month - 1, d:o.day };
+} catch (e) {
+var n = new Date(); return { y:n.getFullYear(), m:n.getMonth(), d:n.getDate() };
+}
+}
+var t = localParts();
+var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+var DAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+var firstWd = (new Date(Date.UTC(t.y, t.m, 1)).getUTCDay() + 6) % 7;
+var daysInMonth = new Date(Date.UTC(t.y, t.m + 1, 0)).getUTCDate();
+var rows = Math.ceil((firstWd + daysInMonth) / 7);
+var dayOfYear = Math.round((Date.UTC(t.y, t.m, t.d) - Date.UTC(t.y, 0, 0)) / 86400000);
+var todayWd = new Date(Date.UTC(t.y, t.m, t.d)).getUTCDay();
+document.getElementById("month").textContent = MONTHS[t.m];
+document.getElementById("year").textContent = t.y;
+document.getElementById("date").textContent = DAYS[todayWd] + " " + t.d;
+document.getElementById("aff").textContent = AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
+document.getElementById("foot").textContent = HER_NAME ? "\u2665 For " + HER_NAME : "\u2665";
+var grid = document.getElementById("grid");
+grid.style.gridTemplateRows = "repeat(" + rows + ", 1fr)";
+for (var i = 0; i < rows * 7; i++) {
+var d = i - firstWd + 1, cell = document.createElement("div");
+if (d >= 1 && d <= daysInMonth) {
+cell.className = "ac-day" + (d === t.d ? " ac-today" : "");
+cell.textContent = d;
+if (d < t.d) { var h = document.createElement("span"); h.className = "ac-heart"; h.textContent = "\u2665"; cell.appendChild(h); }
+}
+grid.appendChild(cell);
+}
+</script>
+</body>
+</html>
